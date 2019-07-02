@@ -1,26 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import Autocomplete from "./Autocomplete";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const options = [
+  "Apple",
+  "Banana",
+  "Orange",
+  "Pear",
+  "Grape",
+  "Raspberry",
+  "Strawberry",
+  "Kiwi"
+].sort((a, b) => a.localeCompare(b));
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      fruitOptions: []
+    };
+
+    this.handleAutocompleteChange = this.handleAutocompleteChange.bind(this);
+  }
+
+  handleAutocompleteChange(e) {
+    const searchValue = e.target.value;
+
+    this.setState({
+      fruitOptions: searchValue.length
+        ? options.filter(
+            option =>
+              option
+                .toLocaleLowerCase()
+                .indexOf(searchValue.toLocaleLowerCase()) >= 0
+          )
+        : []
+    });
+  }
+
+  render() {
+    return (
+      <div className="container">
+        <h1>React Autocomplete Demo</h1>
+        <Autocomplete
+          onChange={this.handleAutocompleteChange}
+          options={this.state.fruitOptions}
+        />
+      </div>
+    );
+  }
 }
 
 export default App;
