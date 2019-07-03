@@ -5,11 +5,15 @@ class Autocomplete extends React.Component {
     super(props);
 
     this.state = {
-      activeIndex: 0
+      activeIndex: 0,
+      valueSelected: false
     };
+
+    this.inputRef = React.createRef();
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleInputKeyDown = this.handleInputKeyDown.bind(this);
+    this.handleSelection = this.handleSelection.bind(this);
   }
 
   handleInputChange(e) {
@@ -17,34 +21,59 @@ class Autocomplete extends React.Component {
   }
 
   handleInputKeyDown(e) {
-    const currentActiveIndex = this.state.activeIndex;
+    const { activeIndex, valueSelected } = this.state;
 
     switch (e.keyCode) {
-      case 38:
-        if (currentActiveIndex >= 1) {
-          console.log("Up");
+      case 8: // Backspace
+        if (valueSelected) {
+          e.target.value = "";
+          this.props.onChange(e);
           this.setState({
-            activeIndex: currentActiveIndex - 1
+            valueSelected: false
+          });
+        }
+        break;
+
+      case 13: // Enter key
+        this.handleSelection(activeIndex);
+        break;
+
+      case 38: // Up arrow
+        if (activeIndex >= 1) {
+          this.setState({
+            activeIndex: activeIndex - 1
           });
 
           e.preventDefault();
         }
         break;
-      case 40:
-        if (currentActiveIndex < this.props.options.length - 1) {
-          console.log("Down");
+
+      case 40: // Down arrow
+        if (activeIndex < this.props.options.length - 1) {
           this.setState({
-            activeIndex: currentActiveIndex + 1
+            activeIndex: activeIndex + 1
           });
 
           e.preventDefault();
         }
         break;
+
       default:
+        if (valueSelected) {
+          e.preventDefault();
+        }
         break;
     }
+  }
 
-    console.log(e.keyCode);
+  handleSelection(index) {
+    if (this.props.options[index]) {
+      this.setState({
+        valueSelected: true
+      });
+
+      this.inputRef.current.value = this.props.options[index];
+    }
   }
 
   render() {
@@ -55,10 +84,11 @@ class Autocomplete extends React.Component {
             onChange={this.handleInputChange}
             onKeyDown={this.handleInputKeyDown}
             type="text"
+            ref={this.inputRef}
           />
         </div>
         <div className="autocomplete-results">
-          {this.props.options.length > 0 && (
+          {this.props.options.length > 0 && !this.state.valueSelected && (
             <ul>
               {this.props.options.map((option, index) => (
                 <li
@@ -66,6 +96,7 @@ class Autocomplete extends React.Component {
                     this.state.activeIndex === index ? "active" : ""
                   }`}
                   key={option}
+                  onClick={() => this.handleSelection(index)}
                 >
                   {option}
                 </li>
